@@ -15,7 +15,7 @@ export default function Home() {
   const [showToolsDropdown, setShowToolsDropdown] = useState(false);
   const [selectedTool, setSelectedTool] = useState<string | null>(null);
   const [isCanvasExpanded, setIsCanvasExpanded] = useState(false);
-  const [animationState, setAnimationState] = useState<'initial' | 'ui-fade-out' | 'bg-change' | 'expanding' | 'content-repositioning' | 'expanded' | 'conversation-fade-in'>('initial');
+  const [animationState, setAnimationState] = useState<'initial' | 'ui-fade-out' | 'bg-change' | 'expanding' | 'content-repositioning' | 'expanded' | 'conversation-fade-in' | 'exiting'>('initial');
   const canvasPreviewRef = useRef<HTMLDivElement>(null);
   const [canvasPosition, setCanvasPosition] = useState({ left: 0, top: 0, width: 0, height: 0 });
   const [splitRatio, setSplitRatio] = useState(0.25); // 25% for conversation, 75% for canvas
@@ -78,9 +78,14 @@ export default function Home() {
   const handleCloseCanvas = () => {
     if (!isCanvasExpanded) return;
     
-    // Reverse animation sequence would go here
-    setIsCanvasExpanded(false);
-    setAnimationState('initial');
+    // Start fade out animation
+    setAnimationState('exiting');
+    
+    // After fade out completes, reset to initial state
+    setTimeout(() => {
+      setIsCanvasExpanded(false);
+      setAnimationState('initial');
+    }, 150); // Faster fade duration
   };
 
   const handleMouseDown = (e: React.MouseEvent) => {
@@ -191,7 +196,7 @@ export default function Home() {
       </div>
       
       {/* Content */}
-      <div className="p-6 relative">
+      <div className="p-6 relative overflow-y-auto" style={{ maxHeight: '300px' }}>
         <div className="absolute right-0 top-0 bottom-0 w-1 bg-gray-600"></div>
         <h1 
           className={`text-3xl font-bold text-white mb-6 transition-all duration-300 ${
@@ -234,7 +239,23 @@ export default function Home() {
           </p>
           <p className="text-gray-500">
             Inside the pouch were a handful of smooth river stones, a rusted iron key, and a folded piece of 
-            parchment...
+            parchment that seemed to glow faintly in the morning light. The fox&apos;s ears perked up as it heard 
+            footsteps approaching from deeper within the forest.
+          </p>
+          <p>
+            The stranger, cloaked in deep green robes that seemed to blend with the forest itself, paused at 
+            the disturbed earth and frowned. They had been too late. The ancient artifact, hidden here for 
+            centuries, was now in the possession of a creature that had no understanding of its true power.
+          </p>
+          <p className="text-gray-500">
+            As the fox bounded away through the undergrowth, the mysterious parchment began to unfold itself, 
+            revealing intricate symbols that pulsed with an otherworldly energy. The forest itself seemed to 
+            respond to this awakening, with leaves rustling without wind and shadows moving independent of their sources.
+          </p>
+          <p>
+            Deep in its burrow, the fox examined its treasure. The stones felt warm to the touch, and the iron key 
+            hummed with a low, almost inaudible frequency. But it was the parchment that truly captivated the 
+            creature&apos;s attention—for as it looked upon the symbols, images began to form in its mind.
           </p>
         </div>
       </div>
@@ -503,7 +524,9 @@ export default function Home() {
 
       {/* Expanded Canvas Overlay */}
       {isCanvasExpanded && (
-        <div className="fixed inset-0 bg-[#212121] z-50 flex">
+        <div className={`fixed inset-0 bg-[#212121] z-50 flex transition-opacity duration-150 ${
+          animationState === 'exiting' ? 'opacity-0' : 'opacity-100'
+        }`}>
           {/* Conversation Sidebar - LEFT SIDE */}
           <div 
             className={`bg-[#212121] border-r border-[#3a3a3a] flex flex-col ${
