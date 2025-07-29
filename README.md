@@ -1,4 +1,4 @@
-````markdown
+
 # Canvas - ChatGPT-style Canvas Interface
 
 A Next.js application recreating ChatGPT's Canvas feature with smooth expansion animations and real-time editing capabilities. This project demonstrates advanced React component architecture and complex state-driven animations.
@@ -198,4 +198,4 @@ For detailed deployment instructions, see the [Next.js deployment documentation]
 - [Next.js Documentation](https://nextjs.org/docs) - Learn about Next.js features and API
 - [React Animation Patterns](https://reactcommunity.org/react-transition-group/) - Advanced animation techniques
 - [Tailwind CSS](https://tailwindcss.com/docs) - Utility-first CSS framework
-````
+
