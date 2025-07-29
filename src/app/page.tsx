@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 
 interface Message {
   id: number;
@@ -88,14 +88,14 @@ export default function Home() {
     e.preventDefault();
   };
 
-  const handleMouseMove = (e: MouseEvent) => {
+  const handleMouseMove = useCallback((e: MouseEvent) => {
     if (!isDragging) return;
     
     const newRatio = e.clientX / window.innerWidth;
     // Constrain between 20% and 80%
     const constrainedRatio = Math.max(0.2, Math.min(0.8, newRatio));
     setSplitRatio(constrainedRatio);
-  };
+  }, [isDragging]);
 
   // Force re-render of canvas padding when splitRatio changes
   const [, forceUpdate] = useState({});
@@ -626,8 +626,7 @@ export default function Home() {
                   </p>
                   <p className="text-gray-500">
                     Inside the pouch were a handful of smooth river stones, a rusted iron key, and a folded piece of 
-                    parchment that seemed to glow faintly in the morning light. The fox's ears perked up as it heard 
-                    footsteps approaching from deeper within the forest. Without hesitation, it grabbed the pouch 
+                     parchment that seemed to glow faintly in the morning light. The fox&apos;s ears perked up as it heard                    footsteps approaching from deeper within the forest. Without hesitation, it grabbed the pouch 
                     and bounded away, disappearing into the undergrowth just as a figure emerged from behind the trees.
                   </p>
                   <p>
