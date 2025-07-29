@@ -38,8 +38,8 @@ export default function Home() {
       const assistantMessage: Message = {
         id: Date.now() + 1,
         content: selectedTool === 'Canvas' 
-          ? "Done! Your random document has been created in the canvas. Let me know if you'd like to expand it, edit it, or generate a continuation."
-          : "I'm a ChatGPT clone! This is just a UI recreation.",
+          ? "Done! Your random document has been created in the canvas. Let me know if you&apos;d like to expand it, edit it, or generate a continuation."
+          : "I&apos;m a ChatGPT clone! This is just a UI recreation.",
         role: 'assistant',
         hasCanvas: selectedTool === 'Canvas'
       };
@@ -97,6 +97,36 @@ export default function Home() {
     setSplitRatio(constrainedRatio);
   };
 
+  // Force re-render of canvas padding when splitRatio changes
+  const [, forceUpdate] = useState({});
+  useEffect(() => {
+    if (isCanvasExpanded && isDragging) {
+      forceUpdate({}); // Force component re-render for instant padding updates
+    }
+  }, [splitRatio, isCanvasExpanded, isDragging]);
+
+  // Calculate dynamic padding based on available space
+  const getCanvasPadding = () => {
+    if (!isCanvasExpanded) return '5.5rem'; // collapsed state
+    
+    // Use the actual canvas area width, not full viewport
+    const canvasAreaWidthRatio = (1 - splitRatio); // Canvas gets this fraction of the screen
+    const viewportWidth = typeof window !== 'undefined' ? window.innerWidth : 1920;
+    const actualCanvasWidth = canvasAreaWidthRatio * viewportWidth; // Actual canvas area width in pixels
+    
+    const minTextWidth = 800; // Minimum text content width to protect current layout
+    const minPaddingBuffer = 24; // Minimum padding to always maintain (24px per side)
+    const maxPaddingPerSide = 400; // Maximum padding per side in pixels
+    
+    // Calculate available space for padding (actual canvas width minus minimum text width minus minimum buffer)
+    const availableForPadding = Math.max(0, actualCanvasWidth - minTextWidth - (minPaddingBuffer * 2));
+    
+    // Divide by 2 for left and right padding, but cap at maximum, and always add back minimum buffer
+    const calculatedPaddingPerSide = Math.min(maxPaddingPerSide, availableForPadding / 2) + minPaddingBuffer;
+    
+    return `${calculatedPaddingPerSide}px`;
+  };
+
   const handleMouseUp = () => {
     setIsDragging(false);
   };
@@ -110,7 +140,7 @@ export default function Home() {
         document.removeEventListener('mouseup', handleMouseUp);
       };
     }
-  }, [isDragging]);
+  }, [isDragging, handleMouseMove]);
 
   const clearSelectedTool = () => {
     setSelectedTool(null);
@@ -169,6 +199,14 @@ export default function Home() {
               ? 'transform -translate-y-4' 
               : ''
           }`}
+          style={{
+            paddingLeft: animationState === 'content-repositioning' || animationState === 'expanded' || animationState === 'conversation-fade-in'
+              ? getCanvasPadding()
+              : '5.5rem',
+            paddingRight: animationState === 'content-repositioning' || animationState === 'expanded' || animationState === 'conversation-fade-in'
+              ? getCanvasPadding()
+              : '5.5rem'
+          }}
         >
           The Fox and the Forest
         </h1>
@@ -178,6 +216,14 @@ export default function Home() {
               ? 'transform -translate-y-2 translate-x-4' 
               : ''
           }`}
+          style={{
+            paddingLeft: animationState === 'content-repositioning' || animationState === 'expanded' || animationState === 'conversation-fade-in'
+              ? getCanvasPadding()
+              : '5.5rem',
+            paddingRight: animationState === 'content-repositioning' || animationState === 'expanded' || animationState === 'conversation-fade-in'
+              ? getCanvasPadding()
+              : '5.5rem'
+          }}
         >
           <p>
             On a quiet morning in early spring, a curious fox trotted along the edge of the forest. The trees, 
@@ -401,6 +447,11 @@ export default function Home() {
                           type="button"
                           className="flex items-center gap-2 bg-[#404040] hover:bg-[#4a4a4a] px-3 py-2 rounded-full text-sm text-gray-300"
                         >
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                            <path d="M4 4h16v16H4z" stroke="currentColor" strokeWidth="2"/>
+                            <path d="M4 9h16" stroke="currentColor" strokeWidth="2"/>
+                            <path d="M9 4v16" stroke="currentColor" strokeWidth="2"/>
+                          </svg>
                           Canvas
                           <button
                             onClick={clearSelectedTool}
@@ -511,10 +562,10 @@ export default function Home() {
               transformOrigin: 'left top'
             }}
           >
-            <div className={`border border-[#3a3a3a] overflow-hidden h-full bg-[#212121] ${
+            <div className={`overflow-hidden h-full bg-[#212121] ${
               animationState === 'expanded' || animationState === 'conversation-fade-in' 
                 ? '' 
-                : 'rounded-xl'
+                : 'rounded-xl border border-[#3a3a3a]'
             }`}>
               {/* Header */}
               <div className="flex items-center justify-between px-4 border-b border-[#3a3a3a] h-[57px]">
@@ -536,20 +587,36 @@ export default function Home() {
               </div>
               
               {/* Content */}
-              <div className="p-6 relative" style={{ height: 'calc(100% - 57px)' }}>
+              <div className="relative" style={{ height: 'calc(100% - 57px)', paddingTop: '3rem', paddingBottom: '1.5rem', paddingLeft: '0', paddingRight: '0' }}>
                 <div className="absolute right-0 top-0 bottom-0 w-1 bg-gray-600"></div>
-                <h1 className={`text-5xl font-bold text-white mb-8 transition-all duration-300 ${
+                <h1 className={`text-3xl font-bold text-white mb-8 transition-all duration-300 ${
                   animationState === 'content-repositioning' || animationState === 'expanded' || animationState === 'conversation-fade-in'
                     ? 'transform -translate-y-4' 
                     : ''
-                }`}>
+                }`}
+                style={{
+                  paddingLeft: animationState === 'content-repositioning' || animationState === 'expanded' || animationState === 'conversation-fade-in'
+                    ? getCanvasPadding()
+                    : '5.5rem',
+                  paddingRight: animationState === 'content-repositioning' || animationState === 'expanded' || animationState === 'conversation-fade-in'
+                    ? getCanvasPadding()
+                    : '5.5rem'
+                }}>
                   The Fox and the Forest
                 </h1>
-                <div className={`text-gray-300 leading-relaxed space-y-6 text-lg transition-all duration-300 ${
+                <div className={`text-gray-300 leading-relaxed space-y-6 text-base transition-all duration-300 ${
                   animationState === 'content-repositioning' || animationState === 'expanded' || animationState === 'conversation-fade-in'
                     ? 'transform -translate-y-2 translate-x-4' 
                     : ''
-                }`}>
+                }`}
+                style={{
+                  paddingLeft: animationState === 'content-repositioning' || animationState === 'expanded' || animationState === 'conversation-fade-in'
+                    ? getCanvasPadding()
+                    : '5.5rem',
+                  paddingRight: animationState === 'content-repositioning' || animationState === 'expanded' || animationState === 'conversation-fade-in'
+                    ? getCanvasPadding()
+                    : '5.5rem'
+                }}>
                   <p>
                     On a quiet morning in early spring, a curious fox trotted along the edge of the forest. The trees, 
                     still bare from winter, rustled gently in the breeze as birds called out in anticipation of warmer 
